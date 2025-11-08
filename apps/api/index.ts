@@ -1,0 +1,27 @@
+import express, { Express } from 'express';
+import cors from 'cors';
+import statsRouter from './router/stats';
+import invoiceTrendsRouter from './router/invoice-trends';
+import vendorsRouter from './router/vendors';
+import categorySpendRouter from './router/category-spend';
+import cashOutflowRouter from './router/cash-outflow';
+import invoicesRouter from './router/invoices';
+import chatWithDataRouter from './router/chat-with-data';
+
+const app: Express = express();
+const port = process.env.PORT || 4000;
+
+app.use(cors());
+app.use(express.json());
+
+app.use('/api', statsRouter);
+app.use('/api', invoiceTrendsRouter);
+app.use('/api', vendorsRouter);
+app.use('/api', categorySpendRouter);
+app.use('/api', cashOutflowRouter);
+app.use('/api', invoicesRouter);
+app.use('/api', chatWithDataRouter);
+
+app.listen(port, () => {
+  console.log(`[server]: Server is running at http://localhost:${port}`);
+});

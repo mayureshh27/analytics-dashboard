@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Invoice {
+  id               String     @id @default(cuid())
+  invoiceId        String?
+  invoiceDate      DateTime?
+  deliveryDate     DateTime?
+  subTotal         Float?
+  totalTax         Float?
+  invoiceTotal     Float?
+  currencySymbol   String?
+  documentType     String?
+  status           String?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  vendorId         String?
+  vendor           Vendor?    @relation(fields: [vendorId], references: [id])
+  customerId       String?
+  customer         Customer?  @relation(fields: [customerId], references: [id])
+  paymentId        String?
+  payment          Payment?   @relation(fields: [paymentId], references: [id])
+  lineItems        LineItem[]
+}
+
+model Vendor {
+  id                String    @id @default(cuid())
+  name              String?
+  partyNumber       String?
+  address           String?
+  taxId             String?
+  invoices          Invoice[]
+}
+
+model Customer {
+  id        String    @id @default(cuid())
+  name      String?
+  address   String?
+  invoices  Invoice[]
+}
+
+model Payment {
+  id                String    @id @default(cuid())
+  dueDate           DateTime?
+  paymentTerms      String?
+  bankAccountNumber String?
+  bic               String?
+  accountName       String?
+  netDays           Int?
+  discountPercentage Float?
+  discountDays      Int?
+  discountDueDate   DateTime?
+  discountedTotal   Float?
+  invoices          Invoice[]
+}
+
+model LineItem {
+  id          String   @id @default(cuid())
+  srNo        Int?
+  description String?
+  quantity    Float?
+  unitPrice   Float?
+  totalPrice  Float?
+  sachkonto   String?
+  buSchluessel String?
+  invoiceId   String
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id])
+}
