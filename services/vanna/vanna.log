@@ -1,0 +1,70 @@
+INFO:     Started server process [32472]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+Training Vanna on database schema...
+Adding ddl: 
+        CREATE TABLE Invoice (
+            id VARCHAR PRIMARY KEY,
+            invoiceId VARCHAR,
+            invoiceDate TIMESTAMP,
+            deliveryDate TIMESTAMP,
+            subTotal FLOAT,
+            totalTax FLOAT,
+            invoiceTotal FLOAT,
+            currencySymbol VARCHAR,
+            documentType VARCHAR,
+            status VARCHAR,
+            vendorId VARCHAR REFERENCES Vendor(id),
+            customerId VARCHAR REFERENCES Customer(id),
+            paymentId VARCHAR REFERENCES Payment(id)
+        )
+    
+Adding ddl: 
+        CREATE TABLE Vendor (
+            id VARCHAR PRIMARY KEY,
+            name VARCHAR,
+            partyNumber VARCHAR,
+            address VARCHAR,
+            taxId VARCHAR
+        )
+    
+Adding ddl: 
+        CREATE TABLE Customer (
+            id VARCHAR PRIMARY KEY,
+            name VARCHAR,
+            address VARCHAR
+        )
+    
+Adding ddl: 
+        CREATE TABLE Payment (
+            id VARCHAR PRIMARY KEY,
+            dueDate TIMESTAMP,
+            paymentTerms VARCHAR,
+            bankAccountNumber VARCHAR,
+            bic VARCHAR,
+            accountName VARCHAR,
+            netDays INTEGER,
+            discountPercentage FLOAT,
+            discountDays INTEGER,
+            discountDueDate TIMESTAMP,
+            discountedTotal FLOAT
+        )
+    
+Adding ddl: 
+        CREATE TABLE LineItem (
+            id VARCHAR PRIMARY KEY,
+            srNo INTEGER,
+            description VARCHAR,
+            quantity FLOAT,
+            unitPrice FLOAT,
+            totalPrice FLOAT,
+            sachkonto VARCHAR,
+            buSchluessel VARCHAR,
+            invoiceId VARCHAR REFERENCES Invoice(id)
+        )
+    
+Training complete!
+SQL Prompt: [{'role': 'system', 'content': "You are a SQL expert. Please help to generate a SQL query to answer the question. Your response should ONLY be based on the given context and follow the response guidelines and format instructions. \n===Tables \n\n        CREATE TABLE Invoice (\n            id VARCHAR PRIMARY KEY,\n            invoiceId VARCHAR,\n            invoiceDate TIMESTAMP,\n            deliveryDate TIMESTAMP,\n            subTotal FLOAT,\n            totalTax FLOAT,\n            invoiceTotal FLOAT,\n            currencySymbol VARCHAR,\n            documentType VARCHAR,\n            status VARCHAR,\n            vendorId VARCHAR REFERENCES Vendor(id),\n            customerId VARCHAR REFERENCES Customer(id),\n            paymentId VARCHAR REFERENCES Payment(id)\n        )\n    \n\n\n        CREATE TABLE LineItem (\n            id VARCHAR PRIMARY KEY,\n            srNo INTEGER,\n            description VARCHAR,\n            quantity FLOAT,\n            unitPrice FLOAT,\n            totalPrice FLOAT,\n            sachkonto VARCHAR,\n            buSchluessel VARCHAR,\n            invoiceId VARCHAR REFERENCES Invoice(id)\n        )\n    \n\n\n        CREATE TABLE Payment (\n            id VARCHAR PRIMARY KEY,\n            dueDate TIMESTAMP,\n            paymentTerms VARCHAR,\n            bankAccountNumber VARCHAR,\n            bic VARCHAR,\n            accountName VARCHAR,\n            netDays INTEGER,\n            discountPercentage FLOAT,\n            discountDays INTEGER,\n            discountDueDate TIMESTAMP,\n            discountedTotal FLOAT\n        )\n    \n\n\n        CREATE TABLE Vendor (\n            id VARCHAR PRIMARY KEY,\n            name VARCHAR,\n            partyNumber VARCHAR,\n            address VARCHAR,\n            taxId VARCHAR\n        )\n    \n\n\n        CREATE TABLE Customer (\n            id VARCHAR PRIMARY KEY,\n            name VARCHAR,\n            address VARCHAR\n        )\n    \n\n===Response Guidelines \n1. If the provided context is sufficient, please generate a valid SQL query without any explanations for the question. \n2. If the provided context is almost sufficient but requires knowledge of a specific string in a particular column, please generate an intermediate SQL query to find the distinct strings in that column. Prepend the query with a comment saying intermediate_sql \n3. If the provided context is insufficient, please explain why it can't be generated. \n4. Please use the most relevant table(s). \n5. If the question has been asked and answered before, please repeat the answer exactly as it was given before. \n6. Ensure that the output SQL is SQL-compliant and executable, and free of syntax errors. \n"}, {'role': 'user', 'content': 'What is the total number of invoices?'}]
+Groq API error: Error code: 400 - {'error': {'message': "'messages.0' : for 'role:user' the following must be satisfied[('messages.0.content' : one of the following must be satisfied[('messages.0.content' : value must be a string) OR ('messages.0.content.0' : one of the following must be satisfied[('messages.0.content.0.type' : property 'type' is missing) OR ('messages.0.content.0.type' : property 'type' is missing)])])]", 'type': 'invalid_request_error'}}
+INFO:     127.0.0.1:39667 - "POST /api/v1/chat HTTP/1.1" 200 OK
