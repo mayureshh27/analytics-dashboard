@@ -1,5 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// File: apps/api/prisma/schema.prisma
 
 generator client {
   provider = "prisma-client-js"
@@ -10,42 +9,52 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Invoice {
-  id               String     @id @default(cuid())
-  invoiceId        String?
-  invoiceDate      DateTime?
-  deliveryDate     DateTime?
-  subTotal         Float?
-  totalTax         Float?
-  invoiceTotal     Float?
-  currencySymbol   String?
-  documentType     String?
-  status           String?
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt
-  vendorId         String?
-  vendor           Vendor?    @relation(fields: [vendorId], references: [id])
-  customerId       String?
-  customer         Customer?  @relation(fields: [customerId], references: [id])
-  paymentId        String?
-  payment          Payment?   @relation(fields: [paymentId], references: [id])
-  lineItems        LineItem[]
-}
-
 model Vendor {
-  id                String    @id @default(cuid())
-  name              String?
-  partyNumber       String?
-  address           String?
-  taxId             String?
-  invoices          Invoice[]
+  id          String    @id @default(cuid())
+  name        String    @unique // Unique name is crucial for connectOrCreate
+  address     String?
+  taxId       String?
+  partyNumber String?
+  invoices    Invoice[]
+  createdAt   DateTime  @default(now())
 }
 
 model Customer {
   id        String    @id @default(cuid())
-  name      String?
+  name      String    @unique // Unique name is crucial
   address   String?
   invoices  Invoice[]
+  createdAt DateTime  @default(now())
+}
+
+model Invoice {
+  id             String    @id @default(cuid())
+  documentId     String?   @unique // From the top-level _id
+  status         String
+  invoiceNumber  String
+  invoiceDate    DateTime
+  deliveryDate   DateTime?
+  subTotal       Decimal? // <-- FIXED: Use Decimal for money
+  totalTax       Decimal? // <-- FIXED: Use Decimal for money
+  invoiceTotal   Decimal // <-- FIXED: Use Decimal for money
+  currencySymbol String?
+  documentType   String?
+  createdAt      DateTime  @default(now())
+
+  vendorId String
+  vendor   Vendor @relation(fields: [vendorId], references: [id])
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  // FIXED: 1-to-1 relationship
+  payment Payment?
+
+  lineItems LineItem[]
+
+  @@index([vendorId])
+  @@index([customerId])
+  @@index([invoiceDate])
 }
 
 model Payment {
@@ -53,25 +62,34 @@ model Payment {
   dueDate           DateTime?
   paymentTerms      String?
   bankAccountNumber String?
-  bic               String?
-  accountName       String?
-  netDays           Int?
-  discountPercentage Float?
-  discountDays      Int?
-  discountDueDate   DateTime?
-  discountedTotal   Float?
-  invoices          Invoice[]
+
+  // FIXED: 1-to-1 relationship with Invoice
+  invoiceId String  @unique
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 }
 
 model LineItem {
   id          String   @id @default(cuid())
-  srNo        Int?
   description String?
-  quantity    Float?
-  unitPrice   Float?
-  totalPrice  Float?
-  sachkonto   String?
-  buSchluessel String?
-  invoiceId   String
-  invoice     Invoice  @relation(fields: [invoiceId], references: [id])
+  quantity    Float? // Float is OK for quantity
+  unitPrice   Decimal? // <-- FIXED: Use Decimal for money
+  totalPrice  Decimal? // <-- FIXED: Use Decimal for money
+  buKey       String? // From BUSchluessel
+
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  // FIXED: Normalized categories
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  @@index([invoiceId])
+  @@index([categoryId])
+}
+
+// FIXED: Added missing Category table
+model Category {
+  id        String     @id @default(cuid())
+  code      String     @unique // This will be the "Sachkonto" value
+  lineItems LineItem[]
 }

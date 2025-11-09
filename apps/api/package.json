@@ -6,7 +6,8 @@
   "scripts": {
     "test": "ts-node test-endpoints.ts",
     "dev": "ts-node index.ts",
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node prisma/seed.ts",
+    "db:push": "prisma db push"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
