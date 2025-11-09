@@ -1,3 +1,4 @@
+// File: apps/api/router/stats.ts
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 
@@ -14,8 +15,8 @@ router.get('/stats', async (req, res) => {
 
     const totalInvoices = await prisma.invoice.count();
 
-    // This is a placeholder as the data does not contain this information
-    const documentsUploaded = 0; 
+    // Use the count of documents you just seeded
+    const documentsUploaded = await prisma.invoice.count();
 
     const averageInvoiceValue = await prisma.invoice.aggregate({
       _avg: {
@@ -24,12 +25,15 @@ router.get('/stats', async (req, res) => {
     });
 
     res.json({
-      totalSpend: totalSpend._sum.invoiceTotal,
+      // Convert Decimal to number for JSON
+      totalSpend: totalSpend._sum.invoiceTotal?.toNumber() || 0,
       totalInvoices,
       documentsUploaded,
-      averageInvoiceValue: averageInvoiceValue._avg.invoiceTotal,
+      // Convert Decimal to number for JSON
+      averageInvoiceValue: averageInvoiceValue._avg.invoiceTotal?.toNumber() || 0,
     });
   } catch (error) {
+    console.error('Error fetching stats:', error);
     res.status(500).json({ error: 'Error fetching stats' });
   }
 });

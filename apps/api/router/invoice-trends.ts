@@ -1,3 +1,4 @@
+// File: apps/api/router/invoice-trends.ts
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 
@@ -19,16 +20,16 @@ router.get('/invoice-trends', async (req, res) => {
       },
     });
 
-    // The data is not monthly, so we are returning the daily data.
-    // The frontend will need to aggregate this data monthly.
-    const formattedTrends = invoiceTrends.map(item => ({
-        date: item.invoiceDate,
-        totalSpend: item._sum.invoiceTotal,
-        invoiceCount: item._count._all,
+    const formattedTrends = invoiceTrends.map((item) => ({
+      date: item.invoiceDate,
+      // Convert Decimal to number
+      totalSpend: item._sum.invoiceTotal?.toNumber() || 0,
+      invoiceCount: item._count._all,
     }));
 
     res.json(formattedTrends);
   } catch (error) {
+    console.error('Error fetching invoice trends:', error);
     res.status(500).json({ error: 'Error fetching invoice trends' });
   }
 });
