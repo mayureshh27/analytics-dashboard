@@ -55,6 +55,8 @@ export default function Home() {
               <VendorChart />
           </div>
           <div className="mt-8">
+              <CategoryChart/>
+              <CashflowChart/>
               <InvoicesTable />
           </div>
       </>
