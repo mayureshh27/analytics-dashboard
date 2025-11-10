@@ -78,7 +78,7 @@ export default function ChatPage() {
           }
         }
       }
-      buffer = parts[parts.length - 1];
+      buffer = parts[parts.length - 1] ?? "";
     }
     fetchHistory();
   };
