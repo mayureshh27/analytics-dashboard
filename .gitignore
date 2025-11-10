@@ -37,3 +37,10 @@ yarn-error.log*
 .DS_Store
 *.pem
 venv
+# Python cache
+__pycache__/
+*.pyc
+
+# Vanna AI / ChromaDB generated data
+services/vanna/*.sqlite3
+services/vanna/**/*.bin
