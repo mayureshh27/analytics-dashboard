@@ -13,7 +13,11 @@ import chatWithDataRouter from './router/chat-with-data';
 const app: Express = express();
 const port = process.env.PORT || 4000;
 
-app.use(cors());
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN || '*',
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 app.use('/api', statsRouter);
@@ -26,6 +30,4 @@ app.use('/api', chatWithDataRouter);
 app.use('/api', historyRouter);
 app.use('/api', exportRouter);
 
-app.listen(port, () => {
-  console.log(`[server]: Server is running at http://localhost:${port}`);
-});
+export default app;

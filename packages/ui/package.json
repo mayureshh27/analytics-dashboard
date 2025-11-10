@@ -10,7 +10,8 @@
     "./button": "./dist/components/ui/button.js",
     "./card": "./dist/components/ui/card.js",
     "./input": "./dist/components/ui/input.js",
-    "./table": "./dist/components/ui/table.js"
+    "./table": "./dist/components/ui/table.js",
+    "./lib/utils": "./dist/lib/utils.js"
   },
   "scripts": {
     "build": "tsc",
