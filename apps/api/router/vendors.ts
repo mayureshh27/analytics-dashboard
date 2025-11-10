@@ -1,39 +1,28 @@
-// File: apps/api/router/vendors.ts
-import { Router, Request, Response } from 'express';
+import express from 'express';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
-const router = Router();
+const router = express.Router();
 
-router.get('/vendors/top10', async (req: Request, res: Response) => {
+router.get('/vendors/top10', async (req: express.Request, res: express.Response) => {
     try {
-        // 1. Group invoices by vendorId and sum their totals in the DB (efficient).
         const vendorSpend = await prisma.invoice.groupBy({
             by: ['vendorId'],
-            _sum: {
-                invoiceTotal: true,
-            },
-            orderBy: {
-                _sum: {
-                    invoiceTotal: 'desc',
-                },
-            },
+            _sum: { invoiceTotal: true },
+            orderBy: { _sum: { invoiceTotal: 'desc' } },
             take: 10,
         });
 
-        // 2. Get the names for the top 10 vendor IDs.
-        const vendorIds = vendorSpend.map((v) => v.vendorId);
+        const vendorIds = vendorSpend.map((v: any) => v.vendorId);
         const vendors = await prisma.vendor.findMany({
             where: { id: { in: vendorIds } },
             select: { id: true, name: true },
         });
 
-        // 3. Map the names back to the sums.
-        const vendorMap = new Map(vendors.map((v) => [v.id, v.name]));
+        const vendorMap = new Map(vendors.map((v: any) => [v.id, v.name]));
 
-        const formattedVendors = vendorSpend.map((item) => ({
+        const formattedVendors = vendorSpend.map((item: any) => ({
             name: vendorMap.get(item.vendorId) || 'Unknown Vendor',
-            // 4. Convert the Decimal sum to a number for the frontend.
             totalSpend: item._sum.invoiceTotal?.toNumber() || 0,
         }));
 

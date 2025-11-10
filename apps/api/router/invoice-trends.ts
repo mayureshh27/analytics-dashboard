@@ -1,28 +1,20 @@
-// File: apps/api/router/invoice-trends.ts
-import { Router, Request, Response } from 'express';
+import express from 'express';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
-const router = Router();
+const router = express.Router();
 
-router.get('/invoice-trends', async (req: Request, res: Response) => {
+router.get('/invoice-trends', async (req: express.Request, res: express.Response) => {
   try {
     const invoiceTrends = await prisma.invoice.groupBy({
       by: ['invoiceDate'],
-      _sum: {
-        invoiceTotal: true,
-      },
-      _count: {
-        _all: true,
-      },
-      orderBy: {
-        invoiceDate: 'asc',
-      },
+      _sum: { invoiceTotal: true },
+      _count: { _all: true },
+      orderBy: { invoiceDate: 'asc' }
     });
 
-    const formattedTrends = invoiceTrends.map((item) => ({
+    const formattedTrends = invoiceTrends.map((item: any) => ({
       date: item.invoiceDate,
-      // Convert Decimal to number
       totalSpend: item._sum.invoiceTotal?.toNumber() || 0,
       invoiceCount: item._count._all,
     }));

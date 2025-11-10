@@ -1,34 +1,23 @@
-import { Router, Request, Response } from 'express';
+import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import { Parser } from 'json2csv';
 import * as xlsx from 'xlsx';
 
 const prisma = new PrismaClient();
-const router = Router();
+const router = express.Router();
 
-router.post('/export/csv', async (req: Request, res: Response) => {
+router.post('/export/csv', async (req: express.Request, res: express.Response) => {
     const { sql } = req.body;
-
-    if (!sql) {
-        return res.status(400).json({ error: 'SQL query is required' });
-    }
+    if (!sql) return res.status(400).json({ error: 'SQL query is required' });
 
     try {
         const result: any[] = await prisma.$queryRawUnsafe(sql);
+        if (result.length === 0) return res.status(404).json({ error: 'No data to export' });
 
-        if (result.length === 0) {
-            return res.status(404).json({ error: 'No data to export' });
-        }
-
-        // BigInts are not supported by JSON.stringify, so we convert them to strings
         const sanitizedResult = result.map(row => {
             const newRow: { [key: string]: any } = {};
             for (const key in row) {
-                if (typeof row[key] === 'bigint') {
-                    newRow[key] = row[key].toString();
-                } else {
-                    newRow[key] = row[key];
-                }
+                newRow[key] = typeof row[key] === 'bigint' ? row[key].toString() : row[key];
             }
             return newRow;
         });
@@ -45,29 +34,18 @@ router.post('/export/csv', async (req: Request, res: Response) => {
     }
 });
 
-router.post('/export/excel', async (req: Request, res: Response) => {
+router.post('/export/excel', async (req: express.Request, res: express.Response) => {
     const { sql } = req.body;
-
-    if (!sql) {
-        return res.status(400).json({ error: 'SQL query is required' });
-    }
+    if (!sql) return res.status(400).json({ error: 'SQL query is required' });
 
     try {
         const result: any[] = await prisma.$queryRawUnsafe(sql);
+        if (result.length === 0) return res.status(404).json({ error: 'No data to export' });
 
-        if (result.length === 0) {
-            return res.status(404).json({ error: 'No data to export' });
-        }
-        
-        // BigInts are not supported by JSON.stringify, so we convert them to strings
         const sanitizedResult = result.map(row => {
             const newRow: { [key: string]: any } = {};
             for (const key in row) {
-                if (typeof row[key] === 'bigint') {
-                    newRow[key] = row[key].toString();
-                } else {
-                    newRow[key] = row[key];
-                }
+                newRow[key] = typeof row[key] === 'bigint' ? row[key].toString() : row[key];
             }
             return newRow;
         });
@@ -75,7 +53,6 @@ router.post('/export/excel', async (req: Request, res: Response) => {
         const worksheet = xlsx.utils.json_to_sheet(sanitizedResult);
         const workbook = xlsx.utils.book_new();
         xlsx.utils.book_append_sheet(workbook, worksheet, 'Results');
-
         const buffer = xlsx.write(workbook, { type: 'buffer', bookType: 'xlsx' });
 
         res.header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

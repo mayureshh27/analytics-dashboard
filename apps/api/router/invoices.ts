@@ -1,50 +1,29 @@
-// File: apps/api/router/invoices.ts
-import { Router, Request, Response } from 'express';
+import express from 'express';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
-const router = Router();
+const router = express.Router();
 
-router.get('/invoices', async (req: Request, res: Response) => {
-  const { search, sortBy, sortOrder } = req.query;
+router.get('/invoices', async (req: express.Request, res: express.Response) => {
+    const { search, sortBy, sortOrder } = req.query;
 
-  try {
-    const invoices = await prisma.invoice.findMany({
-      where: {
-        OR: search
-            ? [
-              // FIXED: Search 'invoiceNumber' not 'invoiceId'
-              {
-                invoiceNumber: {
-                  contains: search as string,
-                  mode: 'insensitive',
-                },
-              },
-              {
-                vendor: {
-                  name: { contains: search as string, mode: 'insensitive' },
-                },
-              },
-            ]
-            : undefined,
-      },
-      include: {
-        vendor: true,
-        customer: true,
-        payment: true,
-      },
-      orderBy: sortBy
-          ? {
-            [sortBy as string]: sortOrder || 'asc',
-          }
-          : { invoiceDate: 'desc' }, // Default sort
-    });
+    try {
+        const invoices = await prisma.invoice.findMany({
+            where: {
+                OR: search ? [
+                    { invoiceNumber: { contains: search as string, mode: 'insensitive' } },
+                    { vendor: { name: { contains: search as string, mode: 'insensitive' } } }
+                ] : undefined,
+            },
+            include: { vendor: true, customer: true, payment: true },
+            orderBy: sortBy ? { [sortBy as string]: sortOrder || 'asc' } : { invoiceDate: 'desc' }
+        });
 
-    res.json(invoices);
-  } catch (error) {
-    console.error('Error fetching invoices:', error);
-    res.status(500).json({ error: 'Error fetching invoices' });
-  }
+        res.json(invoices);
+    } catch (error) {
+        console.error('Error fetching invoices:', error);
+        res.status(500).json({ error: 'Error fetching invoices' });
+    }
 });
 
 export default router;

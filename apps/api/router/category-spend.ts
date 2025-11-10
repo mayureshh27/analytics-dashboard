@@ -1,41 +1,27 @@
-// File: apps/api/router/category-spend.ts
-import { Router, Request, Response } from 'express';
+import express from 'express';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
-const router = Router();
+const router = express.Router();
 
-router.get('/category-spend', async (req: Request, res: Response) => {
+router.get('/category-spend', async (req: express.Request, res: express.Response) => {
   try {
-    // 1. Group by the foreign key 'categoryId'
     const categorySpend = await prisma.lineItem.groupBy({
       by: ['categoryId'],
-      _sum: {
-        totalPrice: true,
-      },
-      orderBy: {
-        _sum: {
-          totalPrice: 'desc',
-        },
-      },
+      _sum: { totalPrice: true },
+      orderBy: { _sum: { totalPrice: 'desc' } }
     });
 
-    // 2. Get the actual category info (the 'code', which is the Sachkonto)
-    const categoryIds = categorySpend
-        .map((c) => c.categoryId)
-        .filter((id) => id) as string[]; // Filter out any nulls
-
+    const categoryIds = categorySpend.map((c: any) => c.categoryId).filter((id: any) => id) as string[];
     const categories = await prisma.category.findMany({
       where: { id: { in: categoryIds } },
-      select: { id: true, code: true },
+      select: { id: true, code: true }
     });
 
-    // 3. Map the codes back to the sums
-    const categoryMap = new Map(categories.map((c) => [c.id, c.code]));
+    const categoryMap = new Map(categories.map((c: any) => [c.id, c.code]));
 
-    const formattedCategorySpend = categorySpend.map((item) => ({
+    const formattedCategorySpend = categorySpend.map((item: any) => ({
       category: item.categoryId ? categoryMap.get(item.categoryId) : 'UNKNOWN',
-      // 4. Convert the Decimal sum to a number
       spend: item._sum.totalPrice?.toNumber() || 0,
     }));
 

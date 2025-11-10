@@ -1,41 +1,31 @@
-import { Router, Request, Response } from 'express';
-import fetch from 'node-fetch'; // This is node-fetch@2
+import express from 'express';
+import fetch from 'node-fetch';
 import { PrismaClient } from '@prisma/client';
-import { TextDecoder } from 'util'; // Import Node.js TextDecoder
+import { TextDecoder } from 'util';
 
 const prisma = new PrismaClient();
-const router = Router();
+const router = express.Router();
 
-router.post('/chat-with-data', async (req: Request, res: Response) => {
+router.post('/chat-with-data', async (req: express.Request, res: express.Response) => {
     const { query } = req.body;
 
     try {
         const response = await fetch(`${process.env.VANNA_API_BASE_URL}/api/v1/chat`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ question: query }),
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        if (!response.body) {
-            throw new Error('Response body was null');
-        }
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.body) throw new Error('Response body was null');
 
         res.setHeader('Content-Type', 'application/x-ndjson');
-
-        // --- THIS IS THE FIX ---
-        // Use Node.js event-based stream handling
 
         const decoder = new TextDecoder();
         let buffer = "";
         let sqlQuery = "";
 
-        response.body.on('data', (value) => {
+        response.body.on('data', (value: any) => {
             const chunk = decoder.decode(value, { stream: true });
             buffer += chunk;
 
@@ -45,42 +35,32 @@ router.post('/chat-with-data', async (req: Request, res: Response) => {
                 if (part) {
                     try {
                         const parsed = JSON.parse(part);
-                        if (parsed.type === 'sql' && !sqlQuery) { // Only save the first SQL query
+                        if (parsed.type === 'sql' && !sqlQuery) {
                             sqlQuery = parsed.data;
-
-                            // Save to database, but don't block the stream.
-                            // Run it in the background and log any errors.
                             prisma.chatHistory.create({
-                                data: {
-                                    question: query,
-                                    sql: sqlQuery,
-                                },
-                            }).catch(dbError => {
+                                data: { question: query, sql: sqlQuery }
+                            }).catch((dbError: any) => {
                                 console.error('Error saving to chat history:', dbError);
                             });
                         }
-                        res.write(part + '\n'); // Stream this part to the client
+                        res.write(part + '\n');
                     } catch (e) {
                         console.error('Error parsing stream part:', part, e);
                     }
                 }
             }
-            buffer = parts[parts.length - 1]; // Keep the last incomplete part
+            buffer = parts[parts.length - 1];
         });
 
         response.body.on('end', () => {
-            // Handle any remaining data in the buffer
             if (buffer) {
                 try {
                     const parsed = JSON.parse(buffer);
                     if (parsed.type === 'sql' && !sqlQuery) {
                         sqlQuery = parsed.data;
                         prisma.chatHistory.create({
-                            data: {
-                                question: query,
-                                sql: sqlQuery,
-                            },
-                        }).catch(dbError => {
+                            data: { question: query, sql: sqlQuery }
+                        }).catch((dbError: any) => {
                             console.error('Error saving final part to chat history:', dbError);
                         });
                     }
@@ -89,10 +69,10 @@ router.post('/chat-with-data', async (req: Request, res: Response) => {
                     console.error('Error parsing final stream part:', buffer, e);
                 }
             }
-            res.end(); // End the response to the client
+            res.end();
         });
 
-        response.body.on('error', (err) => {
+        response.body.on('error', (err: any) => {
             console.error('Error in response body stream:', err);
             res.status(500).json({ error: 'Error reading from Vanna service' });
         });

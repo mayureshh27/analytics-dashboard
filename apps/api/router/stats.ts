@@ -1,108 +1,45 @@
-// File: apps/api/router/stats.ts
-import { Router, Request, Response } from 'express';
+import express from 'express';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
-const router = Router();
+const router = express.Router();
 
-router.get('/stats', async (req: Request, res: Response) => {
+router.get('/stats', async (req: express.Request, res: express.Response) => {
   try {
-    // Get current month data
     const now = new Date();
     const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
 
-    // Total spend (all time)
-    const totalSpend = await prisma.invoice.aggregate({
-      _sum: {
-        invoiceTotal: true,
-      },
-    });
-
-    // Last month spend
+    const totalSpend = await prisma.invoice.aggregate({ _sum: { invoiceTotal: true } });
     const lastMonthSpend = await prisma.invoice.aggregate({
-      where: {
-        createdAt: {
-          gte: lastMonthStart,
-          lte: lastMonthEnd,
-        },
-      },
-      _sum: {
-        invoiceTotal: true,
-      },
+      where: { createdAt: { gte: lastMonthStart, lte: lastMonthEnd } },
+      _sum: { invoiceTotal: true }
     });
-
-    // Current month spend
     const currentMonthSpend = await prisma.invoice.aggregate({
-      where: {
-        createdAt: {
-          gte: currentMonthStart,
-        },
-      },
-      _sum: {
-        invoiceTotal: true,
-      },
+      where: { createdAt: { gte: currentMonthStart } },
+      _sum: { invoiceTotal: true }
     });
 
-    // Total invoices
     const totalInvoices = await prisma.invoice.count();
-
-    // Last month invoices
     const lastMonthInvoices = await prisma.invoice.count({
-      where: {
-        createdAt: {
-          gte: lastMonthStart,
-          lte: lastMonthEnd,
-        },
-      },
+      where: { createdAt: { gte: lastMonthStart, lte: lastMonthEnd } }
     });
-
-    // Current month invoices
     const currentMonthInvoices = await prisma.invoice.count({
-      where: {
-        createdAt: {
-          gte: currentMonthStart,
-        },
-      },
+      where: { createdAt: { gte: currentMonthStart } }
     });
 
-    // Documents uploaded
     const documentsUploaded = await prisma.invoice.count();
-
-    // Average invoice value
-    const averageInvoiceValue = await prisma.invoice.aggregate({
-      _avg: {
-        invoiceTotal: true,
-      },
-    });
-
-    // Last month average
+    const averageInvoiceValue = await prisma.invoice.aggregate({ _avg: { invoiceTotal: true } });
     const lastMonthAverage = await prisma.invoice.aggregate({
-      where: {
-        createdAt: {
-          gte: lastMonthStart,
-          lte: lastMonthEnd,
-        },
-      },
-      _avg: {
-        invoiceTotal: true,
-      },
+      where: { createdAt: { gte: lastMonthStart, lte: lastMonthEnd } },
+      _avg: { invoiceTotal: true }
     });
-
-    // Current month average
     const currentMonthAverage = await prisma.invoice.aggregate({
-      where: {
-        createdAt: {
-          gte: currentMonthStart,
-        },
-      },
-      _avg: {
-        invoiceTotal: true,
-      },
+      where: { createdAt: { gte: currentMonthStart } },
+      _avg: { invoiceTotal: true }
     });
 
-    // Generate trend data for last 10 periods
     const trendDays = 10;
     const totalSpendTrend = [];
     const totalInvoicesTrend = [];
@@ -115,50 +52,22 @@ router.get('/stats', async (req: Request, res: Response) => {
       const dayEnd = new Date(date.setHours(23, 59, 59, 999));
 
       const daySpend = await prisma.invoice.aggregate({
-        where: {
-          createdAt: {
-            gte: dayStart,
-            lte: dayEnd,
-          },
-        },
-        _sum: {
-          invoiceTotal: true,
-        },
+        where: { createdAt: { gte: dayStart, lte: dayEnd } },
+        _sum: { invoiceTotal: true }
       });
-
       const dayCount = await prisma.invoice.count({
-        where: {
-          createdAt: {
-            gte: dayStart,
-            lte: dayEnd,
-          },
-        },
+        where: { createdAt: { gte: dayStart, lte: dayEnd } }
       });
-
       const dayAvg = await prisma.invoice.aggregate({
-        where: {
-          createdAt: {
-            gte: dayStart,
-            lte: dayEnd,
-          },
-        },
-        _avg: {
-          invoiceTotal: true,
-        },
+        where: { createdAt: { gte: dayStart, lte: dayEnd } },
+        _avg: { invoiceTotal: true }
       });
 
-      totalSpendTrend.push({
-        value: daySpend._sum.invoiceTotal?.toNumber() || 0
-      });
-      totalInvoicesTrend.push({
-        value: dayCount
-      });
-      averageInvoiceValueTrend.push({
-        value: dayAvg._avg.invoiceTotal?.toNumber() || 0
-      });
+      totalSpendTrend.push({ value: daySpend._sum.invoiceTotal?.toNumber() || 0 });
+      totalInvoicesTrend.push({ value: dayCount });
+      averageInvoiceValueTrend.push({ value: dayAvg._avg.invoiceTotal?.toNumber() || 0 });
     }
 
-    // Calculate percentage changes
     const totalSpendCurrent = currentMonthSpend._sum.invoiceTotal?.toNumber() || 0;
     const totalSpendLast = lastMonthSpend._sum.invoiceTotal?.toNumber() || 0;
     const totalSpendChange = totalSpendLast > 0
@@ -180,14 +89,10 @@ router.get('/stats', async (req: Request, res: Response) => {
       totalInvoices,
       documentsUploaded,
       averageInvoiceValue: averageInvoiceValue._avg.invoiceTotal?.toNumber() || 0,
-
-      // Trend data
       totalSpendTrend,
       totalInvoicesTrend,
-      documentsUploadedTrend: totalInvoicesTrend, // Using same as invoices
+      documentsUploadedTrend: totalInvoicesTrend,
       averageInvoiceValueTrend,
-
-      // Percentage changes
       totalSpendChange: `${parseFloat(totalSpendChange) >= 0 ? '+' : ''}${totalSpendChange}%`,
       totalInvoicesChange: `${parseFloat(totalInvoicesChange) >= 0 ? '+' : ''}${totalInvoicesChange}%`,
       documentsUploadedChange: `${parseFloat(totalInvoicesChange) >= 0 ? '+' : ''}${totalInvoicesChange}%`,
