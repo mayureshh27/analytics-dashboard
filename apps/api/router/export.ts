@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { Parser } from 'json2csv';
 import * as xlsx from 'xlsx';
@@ -6,7 +6,7 @@ import * as xlsx from 'xlsx';
 const prisma = new PrismaClient();
 const router = Router();
 
-router.post('/export/csv', async (req, res) => {
+router.post('/export/csv', async (req: Request, res: Response) => {
     const { sql } = req.body;
 
     if (!sql) {
@@ -45,7 +45,7 @@ router.post('/export/csv', async (req, res) => {
     }
 });
 
-router.post('/export/excel', async (req, res) => {
+router.post('/export/excel', async (req: Request, res: Response) => {
     const { sql } = req.body;
 
     if (!sql) {

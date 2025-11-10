@@ -1,11 +1,11 @@
 // File: apps/api/router/cash-outflow.ts
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 const router = Router();
 
-router.get('/cash-outflow', async (req, res) => {
+router.get('/cash-outflow', async (req: Request, res: Response) => {
   try {
     // 1. Get all payments that have a due date
     const payments = await prisma.payment.findMany({

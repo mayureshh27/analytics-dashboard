@@ -7,7 +7,8 @@
     "test": "ts-node test-endpoints.ts",
     "dev": "ts-node index.ts",
     "seed": "ts-node prisma/seed.ts",
-    "db:push": "prisma db push"
+    "db:push": "prisma db push",
+    "build": "prisma generate && tsc"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
@@ -30,6 +31,7 @@
   },
   "devDependencies": {
     "@prisma/client": "^6.19.0",
+    "@types/node": "^22.15.3",
     "@types/node-fetch": "^2.6.13",
     "prisma": "^6.19.0",
     "ts-node": "^10.9.2"

@@ -1,11 +1,11 @@
 // File: apps/api/router/category-spend.ts
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 const router = Router();
 
-router.get('/category-spend', async (req, res) => {
+router.get('/category-spend', async (req: Request, res: Response) => {
   try {
     // 1. Group by the foreign key 'categoryId'
     const categorySpend = await prisma.lineItem.groupBy({

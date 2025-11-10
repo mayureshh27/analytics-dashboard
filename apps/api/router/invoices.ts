@@ -1,11 +1,11 @@
 // File: apps/api/router/invoices.ts
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 const router = Router();
 
-router.get('/invoices', async (req, res) => {
+router.get('/invoices', async (req: Request, res: Response) => {
   const { search, sortBy, sortOrder } = req.query;
 
   try {

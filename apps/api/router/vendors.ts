@@ -1,11 +1,11 @@
 // File: apps/api/router/vendors.ts
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 const router = Router();
 
-router.get('/vendors/top10', async (req, res) => {
+router.get('/vendors/top10', async (req: Request, res: Response) => {
     try {
         // 1. Group invoices by vendorId and sum their totals in the DB (efficient).
         const vendorSpend = await prisma.invoice.groupBy({
