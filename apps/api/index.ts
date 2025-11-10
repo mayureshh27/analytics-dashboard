@@ -1,4 +1,4 @@
-import express, { Application } from 'express';
+import express from 'express';
 import cors from 'cors';
 import statsRouter from './router/stats';
 import invoiceTrendsRouter from './router/invoice-trends';
@@ -10,7 +10,7 @@ import exportRouter from './router/export';
 import historyRouter from './router/history';
 import chatWithDataRouter from './router/chat-with-data';
 
-const app: Application = express();
+const app = express();
 const port = process.env.PORT || 4000;
 
 const corsOptions = {
@@ -30,4 +30,5 @@ app.use('/api', chatWithDataRouter);
 app.use('/api', historyRouter);
 app.use('/api', exportRouter);
 
+// For Vercel serverless functions
 export default app;
