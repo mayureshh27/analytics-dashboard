@@ -8,12 +8,24 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/card";
 
-export function VendorChart() {
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="p-4 bg-white border rounded-lg shadow-lg">
+        <p className="font-bold">{label}</p>
+        <p style={{ color: '#8b5cf6' }}>{`Total Spend: €${payload[0].value.toLocaleString()}`}</p>
+      </div>
+    );
+  }
+
+  return null;
+};
+
+export function VendorChart({ className }: { className?: string }) {
   const [data, setData] = useState([]);
 
   useEffect(() => {
@@ -23,19 +35,25 @@ export function VendorChart() {
   }, []);
 
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader>
         <CardTitle>Spend by Vendor (Top 10)</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data} layout="vertical">
+          <BarChart data={data} layout="vertical" margin={{ left: 20, right: 20 }}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis type="number" />
-            <YAxis type="category" dataKey="name" width={100} />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="totalSpend" fill="#8884d8" name="Total Spend" />
+            <YAxis
+              type="category"
+              dataKey="name"
+              width={200}
+              tickFormatter={(value) =>
+                value.length > 20 ? `${value.substring(0, 20)}...` : value
+              }
+            />
+            <Tooltip content={<CustomTooltip />} />
+            <Bar dataKey="totalSpend" fill="#8b5cf6" name="Total Spend" />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

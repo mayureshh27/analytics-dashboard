@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -13,7 +13,21 @@ import {
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/card";
 
-export function InvoiceChart() {
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="p-4 bg-white border rounded-lg shadow-lg">
+        <p className="font-bold">{label}</p>
+        <p style={{ color: '#3b82f6' }}>{`Invoice count: ${payload[0].value}`}</p>
+        <p style={{ color: '#8b5cf6' }}>{`Total Spend: €${payload[1].value.toLocaleString()}`}</p>
+      </div>
+    );
+  }
+
+  return null;
+};
+
+export function InvoiceChart({ className }: { className?: string }) {
   const [data, setData] = useState([]);
 
   useEffect(() => {
@@ -35,31 +49,45 @@ export function InvoiceChart() {
   }, []);
 
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader>
         <CardTitle>Invoice Volume + Value Trend</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={data}>
+          <AreaChart data={data}>
+            <defs>
+              <linearGradient id="colorInvoiceCount" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
+                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+              </linearGradient>
+              <linearGradient id="colorTotalSpend" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
+                <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+              </linearGradient>
+            </defs>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="month" />
             <YAxis />
-            <Tooltip />
+            <Tooltip content={<CustomTooltip />} />
             <Legend />
-            <Line
+            <Area
               type="monotone"
               dataKey="invoiceCount"
-              stroke="#8884d8"
+              stroke="#3b82f6"
+              fillOpacity={1} 
+              fill="url(#colorInvoiceCount)"
               name="Invoice Count"
             />
-            <Line
+            <Area
               type="monotone"
               dataKey="totalSpend"
-              stroke="#82ca9d"
+              stroke="#8b5cf6"
+              fillOpacity={1}
+              fill="url(#colorTotalSpend)"
               name="Total Spend"
             />
-          </LineChart>
+          </AreaChart>
         </ResponsiveContainer>
       </CardContent>
     </Card>

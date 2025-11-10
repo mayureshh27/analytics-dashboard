@@ -8,7 +8,9 @@ module.exports = {
     "../../packages/ui/dist/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+
+    },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [],
 }
