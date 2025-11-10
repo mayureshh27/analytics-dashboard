@@ -36,7 +36,7 @@ const ALL_RANGES: RangeData[] = [
     { range: "60+ days", amount: 0, order: 4 },
 ];
 
-export function CashflowChart({ className }: { className?: string }) {
+export function CashflowChart() {
     const [data, setData] = useState<RangeData[]>(ALL_RANGES);
     const [loading, setLoading] = useState(true);
     const [totalOutflow, setTotalOutflow] = useState(0);
@@ -46,7 +46,7 @@ export function CashflowChart({ className }: { className?: string }) {
             .then((res) => res.json())
             .then((apiData: { date: string; amount: number }[]) => {
                 // Start with all ranges set to 0
-                const rangedData = { ...ALL_RANGES.reduce((acc, r) => ({ ...acc, [r.range]: { ...r } }), {}) };
+                const rangedData: { [key: string]: RangeData } = { ...ALL_RANGES.reduce((acc, r) => ({ ...acc, [r.range]: { ...r } }), {}) };
 
                 // Populate with actual data
                 apiData.forEach((item: { date: string; amount: number }) => {
@@ -79,7 +79,7 @@ export function CashflowChart({ className }: { className?: string }) {
 
     if (loading) {
         return (
-            <Card className={`p-6 ${className || ""}`}>
+            <Card className="p-6">
                 <div className="mb-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-1">
                         Cash Outflow Forecast
@@ -99,7 +99,7 @@ export function CashflowChart({ className }: { className?: string }) {
     const maxAmount = Math.max(...data.map(d => d.amount));
 
     return (
-        <Card className={`p-6 ${className || ""}`}>
+        <Card className="p-6">
             <div className="mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-1">
                     Cash Outflow Forecast

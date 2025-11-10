@@ -13,7 +13,7 @@ interface CategoryData {
     spend: number;
 }
 
-export function CategoryChart({ className }: { className?: string }) {
+export function CategoryChart() {
     const [data, setData] = useState<CategoryData[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -32,7 +32,7 @@ export function CategoryChart({ className }: { className?: string }) {
 
     if (loading || data.length === 0) {
         return (
-            <Card className={`p-6 ${className || ""}`}>
+            <Card className="p-6">
                 <div className="mb-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-1">
                         Spend by Category
@@ -49,7 +49,7 @@ export function CategoryChart({ className }: { className?: string }) {
     }
 
     return (
-        <Card className={`p-6 ${className || ""}`}>
+        <Card className="p-6">
             <div className="mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-1">
                     Spend by Category

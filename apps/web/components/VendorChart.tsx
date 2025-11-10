@@ -32,7 +32,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-export function VendorChart({ className }: { className?: string }) {
+export function VendorChart() {
   const [data, setData] = useState<VendorData[]>([]);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
@@ -51,7 +51,7 @@ export function VendorChart({ className }: { className?: string }) {
   const maxSpend = Math.max(...data.map(d => d.totalSpend), 50000);
 
   return (
-      <Card className={`p-6 ${className}`}>
+      <Card className="p-6">
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-1">
             Spend by Vendor (Top 10)
@@ -102,7 +102,6 @@ export function VendorChart({ className }: { className?: string }) {
                   dataKey="totalSpend"
                   fill="#c4b5fd"
                   radius={[0, 4, 4, 0]}
-                  background={{ fill: '#f3f4f6', radius: [0, 4, 4, 0] }}
               >
                 {data.map((entry, index) => (
                     <Cell

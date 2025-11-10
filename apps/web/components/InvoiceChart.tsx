@@ -44,7 +44,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     return null;
 };
 
-export function InvoiceChart({ className }: { className?: string }) {
+export function InvoiceChart() {
     const [data, setData] = useState([]);
 
     useEffect(() => {
@@ -80,7 +80,7 @@ export function InvoiceChart({ className }: { className?: string }) {
     }, []);
 
     return (
-        <Card className={className}>
+        <Card>
             <CardHeader>
                 <CardTitle className="text-lg font-semibold text-gray-900 mb-1">
                     Invoice Volume + Value Trend

@@ -104,13 +104,13 @@ export default function Home() {
             </div>
 
             <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2">
-                <InvoiceChart className="h-full" />
-                <VendorChart className="h-full" />
+                <InvoiceChart />
+                <VendorChart />
             </div>
 
             <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <CategoryChart className="h-full" />
-                <CashflowChart className="h-full" />
+                <CategoryChart />
+                <CashflowChart />
                 <InvoicesTable className="h-full" />
             </div>
         </>

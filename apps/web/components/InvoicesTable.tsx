@@ -16,7 +16,7 @@ type Invoice = {
 
 type SortField = "vendor" | "date" | "invoiceId" | "invoiceTotal" | "status";
 
-export function InvoicesTable() {
+export function InvoicesTable({ className }: { className?: string }) {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -130,7 +130,7 @@ export function InvoicesTable() {
 
   if (loading) {
     return (
-        <Card className="p-4 bg-white dark:bg-slate-800">
+        <Card className={`p-4 bg-white dark:bg-slate-800 ${className}`}>
           <div className="text-center py-8 text-slate-500 dark:text-slate-400">
             Loading invoices...
           </div>
@@ -139,7 +139,7 @@ export function InvoicesTable() {
   }
 
   return (
-      <Card className="p-4 bg-white dark:bg-slate-800">
+      <Card className={`p-4 bg-white dark:bg-slate-800 ${className}`}>
         <div className="mb-4">
           <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-1">
             Invoices by Vendor
