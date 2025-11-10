@@ -1,10 +1,10 @@
-import express from 'express';
+import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
-const router = express.Router();
+const router = Router();
 
-router.get('/stats', async (req: express.Request, res: express.Response) => {
+router.get('/stats', async (req: Request, res: Response) => {
   try {
     const now = new Date();
     const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);

@@ -1,12 +1,12 @@
-import express from 'express';
+import { Router, Request, Response } from 'express';
 import fetch from 'node-fetch';
 import { PrismaClient } from '@prisma/client';
 import { TextDecoder } from 'util';
 
 const prisma = new PrismaClient();
-const router = express.Router();
+const router = Router();
 
-router.post('/chat-with-data', async (req: express.Request, res: express.Response) => {
+router.post('/chat-with-data', async (req: Request, res: Response) => {
     const { query } = req.body;
 
     try {

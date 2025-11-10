@@ -1,10 +1,10 @@
-import express from 'express';
+import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
-const router = express.Router();
+const router = Router();
 
-router.get('/invoices', async (req: express.Request, res: express.Response) => {
+router.get('/invoices', async (req: Request, res: Response) => {
     const { search, sortBy, sortOrder } = req.query;
 
     try {

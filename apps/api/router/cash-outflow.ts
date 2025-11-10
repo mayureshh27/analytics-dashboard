@@ -1,10 +1,10 @@
-import express from 'express';
+import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
-const router = express.Router();
+const router = Router();
 
-router.get('/cash-outflow', async (req: express.Request, res: express.Response) => {
+router.get('/cash-outflow', async (req: Request, res: Response) => {
   try {
     const payments = await prisma.payment.findMany({
       where: { dueDate: { not: null } },

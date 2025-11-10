@@ -1,12 +1,12 @@
-import express from 'express';
+import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { Parser } from 'json2csv';
 import * as xlsx from 'xlsx';
 
 const prisma = new PrismaClient();
-const router = express.Router();
+const router = Router();
 
-router.post('/export/csv', async (req: express.Request, res: express.Response) => {
+router.post('/export/csv', async (req: Request, res: Response) => {
     const { sql } = req.body;
     if (!sql) return res.status(400).json({ error: 'SQL query is required' });
 
@@ -34,7 +34,7 @@ router.post('/export/csv', async (req: express.Request, res: express.Response) =
     }
 });
 
-router.post('/export/excel', async (req: express.Request, res: express.Response) => {
+router.post('/export/excel', async (req: Request, res: Response) => {
     const { sql } = req.body;
     if (!sql) return res.status(400).json({ error: 'SQL query is required' });
 

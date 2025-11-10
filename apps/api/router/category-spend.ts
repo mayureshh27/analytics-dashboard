@@ -1,10 +1,10 @@
-import express from 'express';
+import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
-const router = express.Router();
+const router = Router();
 
-router.get('/category-spend', async (req: express.Request, res: express.Response) => {
+router.get('/category-spend', async (req: Request, res: Response) => {
   try {
     const categorySpend = await prisma.lineItem.groupBy({
       by: ['categoryId'],
