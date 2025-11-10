@@ -6,6 +6,8 @@ import vendorsRouter from './router/vendors';
 import categorySpendRouter from './router/category-spend';
 import cashOutflowRouter from './router/cash-outflow';
 import invoicesRouter from './router/invoices';
+import exportRouter from './router/export';
+import historyRouter from './router/history';
 import chatWithDataRouter from './router/chat-with-data';
 
 const app: Express = express();
@@ -21,6 +23,8 @@ app.use('/api', categorySpendRouter);
 app.use('/api', cashOutflowRouter);
 app.use('/api', invoicesRouter);
 app.use('/api', chatWithDataRouter);
+app.use('/api', historyRouter);
+app.use('/api', exportRouter);
 
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);
