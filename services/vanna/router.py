@@ -3,7 +3,11 @@ from fastapi.responses import StreamingResponse
 from models import ChatRequest
 from vanna_instance import vanna_service # Import the trained instance
 from logging_config import get_logger
+
 import json
+import datetime
+import decimal
+import pandas as pd
 
 router = APIRouter()
 logger = get_logger(__name__)
@@ -27,7 +31,9 @@ async def stream_response(question: str):
         # Yield each row of the dataframe
         if df is not None:
             for _, row in df.iterrows():
-                yield json.dumps({"type": "data", "data": row.to_dict()}) + "\n"
+                row_dict = row.to_dict()
+                # Use the helper function to serialize special types
+                yield json.dumps({"type": "data", "data": row_dict}, default=json_serial_helper) + "\n"
         
         yield json.dumps({"type": "done"}) + "\n"
 
@@ -41,3 +47,17 @@ async def chat(request: ChatRequest):
     Accepts a question and returns a streaming response of the SQL query and its result.
     """
     return StreamingResponse(stream_response(request.question), media_type="application/x-ndjson")
+
+def json_serial_helper(obj):
+    """JSON serializer for objects not serializable by default json code"""
+
+    # Check for pandas Timestamp or native datetime/date
+    if isinstance(obj, (datetime.datetime, datetime.date, pd.Timestamp)):
+        return obj.isoformat()
+
+    # Check for Decimal objects (e.g., from "invoiceTotal")
+    if isinstance(obj, decimal.Decimal):
+        return float(obj) # Convert to a standard float
+
+    # If it's a type we don't recognize, raise an error
+    raise TypeError(f"Type {type(obj)} not serializable")

@@ -1,4 +1,5 @@
-import psycopg2
+from sqlalchemy import create_engine
+import os
 import pandas as pd
 from groq import Groq
 from vanna.openai import OpenAI_Chat
@@ -8,49 +9,38 @@ from logging_config import get_logger
 
 logger = get_logger(__name__)
 
-from psycopg2.pool import SimpleConnectionPool
 #--- Database Connection Pool ---
 try:
-    logger.info("Creating database connection pool...")
-    # Use the DATABASE_URL directly for the pool
-    db_pool = SimpleConnectionPool(
-        minconn=1,
-        maxconn=10,  # Allow up to 10 concurrent connections
-        dsn=DATABASE_URL
-    )
-    logger.info("Database connection pool created successfully.")
+    logger.info("Creating SQLAlchemy engine...")
+
+    # Get the URL from your config
+    db_url = DATABASE_URL
+
+    # IMPORTANT: SQLAlchemy needs "postgresql://" not "postgres://"
+    if db_url and db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+    # SQLAlchemy's engine handles connection pooling automatically
+    engine = create_engine(db_url)
+
+    logger.info("SQLAlchemy engine created successfully.")
 except Exception as e:
-    logger.error(f"Error creating database connection pool: {e}", exc_info=True)
+    logger.error(f"Error creating SQLAlchemy engine: {e}", exc_info=True)
     raise
 
 def run_sql_query(sql: str):
     """
-    Runs a SQL query against the database using a connection from the pool.
+    Runs a SQL query against the database using the SQLAlchemy engine.
     """
-    conn = None
     try:
-        # Get a connection from the pool
-        conn = db_pool.getconn()
-
-        # Use pandas.read_sql_query with the new connection
-        df = pd.read_sql_query(sql, conn)
-
-        # This warning is normal, you can ignore it:
-        # UserWarning: pandas only supports SQLAlchemy connectable...
-
+        # Use pandas.read_sql_query with the SQLAlchemy engine
+        # This is the officially supported method.
+        df = pd.read_sql_query(sql, engine)
         return df
 
     except Exception as e:
         logger.error(f"SQL execution error for query: {sql}", exc_info=True)
-        # Rollback in case of error (optional but good practice)
-        if conn:
-            conn.rollback()
         raise Exception(f"SQL execution error: {str(e)}")
-
-    finally:
-        # IMPORTANT: Always return the connection to the pool
-        if conn:
-            db_pool.putconn(conn)
 
 # --- Custom Vanna Class ---
 class MyVanna(ChromaDB_VectorStore, OpenAI_Chat):
@@ -61,24 +51,40 @@ class MyVanna(ChromaDB_VectorStore, OpenAI_Chat):
 
     def submit_prompt(self, prompt, **kwargs):
         try:
-            # ... (your existing submit_prompt logic, no changes needed) ...
-            if isinstance(prompt, list):
-                messages = prompt
-            elif isinstance(prompt, str):
-                messages = [{"role": "user", "content": prompt}]
-            else:
-                messages = [{"role": "user", "content": str(prompt)}]
-
+            # --- FIX 2 & 3: Fix Groq 400 Error AND Preserve History ---
             valid_messages = []
-            for msg in messages:
-                if isinstance(msg, dict) and 'content' in msg and msg['content']:
-                    valid_messages.append({
-                        "role": msg.get('role', 'user'),
-                        "content": str(msg['content'])
-                    })
+            if isinstance(prompt, list) and len(prompt) > 1:
+                # Vanna builds a prompt: [system_msg, user_msg_1, assistant_msg_1, ..., user_msg_N]
+
+                # Combine the system prompt (prompt[0]) and the *first* user prompt (prompt[1])
+                # This fixes the Groq "must start with role:user" error.
+                system_content = prompt[0].get('content', '')
+                first_user_content = prompt[1].get('content', '')
+                combined_first_message = f"{system_content}\n\n{first_user_content}"
+
+                valid_messages.append({"role": "user", "content": combined_first_message})
+
+                # Add all remaining messages (the chat history).
+                # This allows the AI to learn from its past (e.g., to use double quotes).
+                for msg in prompt[2:]:
+                    if isinstance(msg, dict) and 'content' in msg and msg['content']:
+                        valid_messages.append({
+                            "role": msg.get('role', 'user'), # Keep original role
+                            "content": str(msg['content'])
+                        })
+
+            elif isinstance(prompt, str):
+                # Fallback for a simple string prompt
+                valid_messages.append({"role": "user", "content": prompt})
+
+            else:
+                # Fallback for any other unexpected format
+                content = str(prompt[0].get('content', '')) if isinstance(prompt, list) and len(prompt) > 0 else str(prompt)
+                valid_messages.append({"role": "user", "content": content})
 
             if not valid_messages:
                 valid_messages = [{"role": "user", "content": "Generate SQL query"}]
+            # --- END OF FIX ---
 
             logger.info(f"Submitting prompt to Groq model {self.groq_model}...")
             response = self.groq_client.chat.completions.create(
@@ -88,6 +94,7 @@ class MyVanna(ChromaDB_VectorStore, OpenAI_Chat):
             )
             logger.info("Groq response received.")
             return response.choices[0].message.content
+
         except Exception as e:
             logger.error(f"Groq API error: {e}", exc_info=True)
             raise
