@@ -1,14 +1,10 @@
-import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
-import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
-
-interface Request extends ExpressRequest {}
-interface Response extends ExpressResponse {}
+import { Router, Request, Response, NextFunction } from 'express';
+import { PrismaClient } from '../prisma-client';
 
 const prisma = new PrismaClient();
 const router = Router();
 
-router.get('/category-spend', async (req: Request, res: Response) => {
+router.get('/category-spend', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const categorySpend = await prisma.lineItem.groupBy({
       by: ['categoryId'],
@@ -25,10 +21,10 @@ router.get('/category-spend', async (req: Request, res: Response) => {
       category: item.categoryId ? categoryMap.get(item.categoryId) : 'UNKNOWN',
       spend: item._sum.totalPrice?.toNumber() || 0,
     }));
-    res.json(formattedCategorySpend);
+    return res.json(formattedCategorySpend);
   } catch (error) {
     console.error('Error fetching category spend:', error);
-    res.status(500).json({ error: 'Error fetching category spend' });
+    return res.status(500).json({ error: 'Error fetching category spend' });
   }
 });
 

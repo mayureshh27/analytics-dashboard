@@ -1,21 +1,17 @@
-import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
-import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
-
-interface Request extends ExpressRequest {}
-interface Response extends ExpressResponse {}
+import { Router, Request, Response, NextFunction } from 'express';
+import { PrismaClient } from '../prisma-client';
 
 const prisma = new PrismaClient();
 const router = Router();
 
-router.get('/history', async (req: Request, res: Response) => {
+router.get('/history', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const history = await prisma.chatHistory.findMany({
             orderBy: { createdAt: 'desc' }
         });
-        res.json(history);
+        return res.json(history);
     } catch (error) {
-        res.status(500).json({ error: 'Error fetching chat history' });
+        return res.status(500).json({ error: 'Error fetching chat history' });
     }
 });
 

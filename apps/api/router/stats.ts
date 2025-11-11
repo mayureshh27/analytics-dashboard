@@ -1,14 +1,10 @@
-import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
-import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
-
-interface Request extends ExpressRequest {}
-interface Response extends ExpressResponse {}
+import { Router, Request, Response, NextFunction } from 'express';
+import { PrismaClient } from '../prisma-client';
 
 const prisma = new PrismaClient();
 const router = Router();
 
-router.get('/stats', async (req: Request, res: Response) => {
+router.get('/stats', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const now = new Date();
     const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -82,7 +78,7 @@ router.get('/stats', async (req: Request, res: Response) => {
         ? (((avgCurrent - avgLast) / avgLast) * 100).toFixed(1)
         : "0.0";
 
-    res.json({
+    return res.json({
       totalSpend: totalSpend._sum.invoiceTotal?.toNumber() || 0,
       totalInvoices,
       documentsUploaded,
@@ -98,7 +94,7 @@ router.get('/stats', async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Error fetching stats:', error);
-    res.status(500).json({ error: 'Error fetching stats' });
+    return res.status(500).json({ error: 'Error fetching stats' });
   }
 });
 

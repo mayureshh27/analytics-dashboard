@@ -1,16 +1,12 @@
-import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { Router, Request, Response, NextFunction } from 'express';
+import { PrismaClient } from '../prisma-client';
 import { Parser } from 'json2csv';
 import * as xlsx from 'xlsx';
-import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
-
-interface Request extends ExpressRequest {}
-interface Response extends ExpressResponse {}
 
 const prisma = new PrismaClient();
 const router = Router();
 
-router.post('/export/csv', async (req: Request, res: Response) => {
+router.post('/export/csv', async (req: Request, res: Response, next: NextFunction) => {
     const { sql } = req.body;
     if (!sql) return res.status(400).json({ error: 'SQL query is required' });
     try {
@@ -27,14 +23,14 @@ router.post('/export/csv', async (req: Request, res: Response) => {
         const csv = json2csvParser.parse(sanitizedResult);
         res.header('Content-Type', 'text/csv');
         res.attachment('export.csv');
-        res.send(csv);
+        return res.send(csv);
     } catch (error) {
         console.error('Error exporting to CSV:', error);
-        res.status(500).json({ error: 'Error exporting to CSV' });
+        return res.status(500).json({ error: 'Error exporting to CSV' });
     }
 });
 
-router.post('/export/excel', async (req: Request, res: Response) => {
+router.post('/export/excel', async (req: Request, res: Response, next: NextFunction) => {
     const { sql } = req.body;
     if (!sql) return res.status(400).json({ error: 'SQL query is required' });
     try {
@@ -53,10 +49,10 @@ router.post('/export/excel', async (req: Request, res: Response) => {
         const buffer = xlsx.write(workbook, { type: 'buffer', bookType: 'xlsx' });
         res.header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.attachment('export.xlsx');
-        res.send(buffer);
+        return res.send(buffer);
     } catch (error) {
         console.error('Error exporting to Excel:', error);
-        res.status(500).json({ error: 'Error exporting to Excel' });
+        return res.status(500).json({ error: 'Error exporting to Excel' });
     }
 });
 

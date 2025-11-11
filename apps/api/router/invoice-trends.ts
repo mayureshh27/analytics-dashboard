@@ -1,14 +1,10 @@
-import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
-import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
-
-interface Request extends ExpressRequest {}
-interface Response extends ExpressResponse {}
+import { Router, Request, Response, NextFunction } from 'express';
+import { PrismaClient } from '../prisma-client';
 
 const prisma = new PrismaClient();
 const router = Router();
 
-router.get('/invoice-trends', async (req: Request, res: Response) => {
+router.get('/invoice-trends', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const invoiceTrends = await prisma.invoice.groupBy({
       by: ['invoiceDate'],
@@ -21,10 +17,10 @@ router.get('/invoice-trends', async (req: Request, res: Response) => {
       totalSpend: item._sum.invoiceTotal?.toNumber() || 0,
       invoiceCount: item._count._all,
     }));
-    res.json(formattedTrends);
+    return res.json(formattedTrends);
   } catch (error) {
     console.error('Error fetching invoice trends:', error);
-    res.status(500).json({ error: 'Error fetching invoice trends' });
+    return res.status(500).json({ error: 'Error fetching invoice trends' });
   }
 });
 
