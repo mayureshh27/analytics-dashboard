@@ -12,11 +12,11 @@
     "resolveJsonModule": true,
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
-    "types": ["node", "express"],
-    "baseUrl": ".",
-    "paths": {
-      "@prisma/client": ["./node_modules/.prisma/client"]
-    }
+    "types": ["node", "express"]
+//    "baseUrl": ".",
+//    "paths": {
+//      "@prisma/client": ["./node_modules/.prisma/client"]
+//    }
   },
   "include": ["**/*.ts"],
   "exclude": ["node_modules", "dist"]
