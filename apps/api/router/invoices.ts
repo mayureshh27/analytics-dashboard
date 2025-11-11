@@ -1,12 +1,15 @@
-import { Router, Request, Response } from 'express';
+import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
+import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
+
+interface Request extends ExpressRequest {}
+interface Response extends ExpressResponse {}
 
 const prisma = new PrismaClient();
 const router = Router();
 
 router.get('/invoices', async (req: Request, res: Response) => {
     const { search, sortBy, sortOrder } = req.query;
-
     try {
         const invoices = await prisma.invoice.findMany({
             where: {
@@ -18,7 +21,6 @@ router.get('/invoices', async (req: Request, res: Response) => {
             include: { vendor: true, customer: true, payment: true },
             orderBy: sortBy ? { [sortBy as string]: sortOrder || 'asc' } : { invoiceDate: 'desc' }
         });
-
         res.json(invoices);
     } catch (error) {
         console.error('Error fetching invoices:', error);

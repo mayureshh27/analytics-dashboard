@@ -1,5 +1,9 @@
-import { Router, Request, Response } from 'express';
+import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
+import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
+
+interface Request extends ExpressRequest {}
+interface Response extends ExpressResponse {}
 
 const prisma = new PrismaClient();
 const router = Router();

@@ -1,5 +1,9 @@
-import { Router, Request, Response } from 'express';
+import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
+import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
+
+interface Request extends ExpressRequest {}
+interface Response extends ExpressResponse {}
 
 const prisma = new PrismaClient();
 const router = Router();
@@ -11,9 +15,7 @@ router.get('/cash-outflow', async (req: Request, res: Response) => {
       include: { invoice: { select: { invoiceTotal: true } } },
       orderBy: { dueDate: 'asc' }
     });
-
     const outflowMap = new Map<string, number>();
-
     for (const payment of payments) {
       if (payment.dueDate && payment.invoice?.invoiceTotal) {
         const dateString = payment.dueDate.toISOString().split('T')[0];
@@ -21,12 +23,10 @@ router.get('/cash-outflow', async (req: Request, res: Response) => {
         outflowMap.set(dateString, currentAmount + payment.invoice.invoiceTotal.toNumber());
       }
     }
-
     const formattedCashOutflow = Array.from(outflowMap.entries()).map(([date, amount]) => ({
       date: date,
       amount: amount,
     }));
-
     res.json(formattedCashOutflow);
   } catch (error) {
     console.error('Error fetching cash outflow:', error);

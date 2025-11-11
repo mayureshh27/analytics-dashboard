@@ -1,5 +1,9 @@
-import { Router, Request, Response } from 'express';
+import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
+import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
+
+interface Request extends ExpressRequest {}
+interface Response extends ExpressResponse {}
 
 const prisma = new PrismaClient();
 const router = Router();
@@ -20,7 +24,6 @@ router.get('/stats', async (req: Request, res: Response) => {
       where: { createdAt: { gte: currentMonthStart } },
       _sum: { invoiceTotal: true }
     });
-
     const totalInvoices = await prisma.invoice.count();
     const lastMonthInvoices = await prisma.invoice.count({
       where: { createdAt: { gte: lastMonthStart, lte: lastMonthEnd } }
@@ -28,7 +31,6 @@ router.get('/stats', async (req: Request, res: Response) => {
     const currentMonthInvoices = await prisma.invoice.count({
       where: { createdAt: { gte: currentMonthStart } }
     });
-
     const documentsUploaded = await prisma.invoice.count();
     const averageInvoiceValue = await prisma.invoice.aggregate({ _avg: { invoiceTotal: true } });
     const lastMonthAverage = await prisma.invoice.aggregate({
@@ -50,7 +52,6 @@ router.get('/stats', async (req: Request, res: Response) => {
       date.setDate(date.getDate() - i);
       const dayStart = new Date(date.setHours(0, 0, 0, 0));
       const dayEnd = new Date(date.setHours(23, 59, 59, 999));
-
       const daySpend = await prisma.invoice.aggregate({
         where: { createdAt: { gte: dayStart, lte: dayEnd } },
         _sum: { invoiceTotal: true }
@@ -62,7 +63,6 @@ router.get('/stats', async (req: Request, res: Response) => {
         where: { createdAt: { gte: dayStart, lte: dayEnd } },
         _avg: { invoiceTotal: true }
       });
-
       totalSpendTrend.push({ value: daySpend._sum.invoiceTotal?.toNumber() || 0 });
       totalInvoicesTrend.push({ value: dayCount });
       averageInvoiceValueTrend.push({ value: dayAvg._avg.invoiceTotal?.toNumber() || 0 });
@@ -73,11 +73,9 @@ router.get('/stats', async (req: Request, res: Response) => {
     const totalSpendChange = totalSpendLast > 0
         ? (((totalSpendCurrent - totalSpendLast) / totalSpendLast) * 100).toFixed(1)
         : "0.0";
-
     const totalInvoicesChange = lastMonthInvoices > 0
         ? (((currentMonthInvoices - lastMonthInvoices) / lastMonthInvoices) * 100).toFixed(1)
         : "0.0";
-
     const avgCurrent = currentMonthAverage._avg.invoiceTotal?.toNumber() || 0;
     const avgLast = lastMonthAverage._avg.invoiceTotal?.toNumber() || 0;
     const averageInvoiceValueChange = avgLast > 0
