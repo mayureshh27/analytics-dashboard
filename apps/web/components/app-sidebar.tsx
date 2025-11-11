@@ -18,7 +18,6 @@ import {
     SidebarRail,
 } from "@/components/ui/sidebar";
 
-// Navigation data matching your Buchhaltung structure
 const navData = {
     general: [
         { title: "Dashboard", href: "/", icon: Home },
@@ -33,7 +32,6 @@ const navData = {
     ],
 };
 
-// Version Switcher Component - Buchhaltung branding
 function VersionSwitcher() {
     return (
         <SidebarMenu>
@@ -52,7 +50,6 @@ function VersionSwitcher() {
     );
 }
 
-// App Sidebar Component
 export function AppSidebar({ ...props }) {
     const pathname = usePathname();
 
@@ -62,7 +59,6 @@ export function AppSidebar({ ...props }) {
                 <VersionSwitcher />
             </SidebarHeader>
             <SidebarContent>
-                {/* General Section */}
                 <SidebarGroup>
                     <SidebarGroupLabel>GENERAL</SidebarGroupLabel>
                     <SidebarGroupContent>
@@ -81,7 +77,6 @@ export function AppSidebar({ ...props }) {
                     </SidebarGroupContent>
                 </SidebarGroup>
 
-                {/* Management Section */}
                 <SidebarGroup>
                     <SidebarGroupLabel>MANAGEMENT</SidebarGroupLabel>
                     <SidebarGroupContent>

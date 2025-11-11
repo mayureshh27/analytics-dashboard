@@ -1,16 +1,13 @@
 import os
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
 load_dotenv()
 
-# --- Environment Config ---
 GROQ_API_KEY = os.environ['GROQ_API_KEY']
 DATABASE_URL = os.environ['DATABASE_URL']
-GROQ_MODEL = os.environ.get('GROQ_MODEL', 'llama-3.3-70b-versatile')
+GROQ_MODEL = os.environ.get('llama-3.3-70b-versatile')
 
 def get_db_connection_params():
-    """Parses the DATABASE_URL into a dict for psycopg2."""
     try:
         db_url = DATABASE_URL
         host_port = db_url.split('@')[1].split('/')[0]
@@ -19,7 +16,7 @@ def get_db_connection_params():
             port = int(port)
         else:
             host = host_port
-            port = 5432 # Default PostgreSQL port
+            port = 5432
 
         return {
             'host': host,
@@ -32,5 +29,4 @@ def get_db_connection_params():
         print(f"Error parsing DATABASE_URL: {e}")
         raise
 
-# Export the connection params
 DB_CONN_PARAMS = get_db_connection_params()

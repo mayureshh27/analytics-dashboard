@@ -1,4 +1,3 @@
-// /mycomponents/CashflowChart.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -14,7 +13,6 @@ import {
 } from "recharts";
 import { Card } from "@repo/ui/card";
 
-// Helper function to determine the range based on days
 const getRange = (days: number): string => {
     if (days <= 7) return "0 - 7 days";
     if (days <= 30) return "8-30 days";
@@ -28,7 +26,6 @@ interface RangeData {
     order: number;
 }
 
-// All possible ranges that should always be displayed
 const ALL_RANGES: RangeData[] = [
     { range: "0 - 7 days", amount: 0, order: 1 },
     { range: "8-30 days", amount: 0, order: 2 },
@@ -45,10 +42,8 @@ export function CashflowChart() {
         fetch(`${process.env.NEXT_PUBLIC_API_BASE}/cash-outflow`)
             .then((res) => res.json())
             .then((apiData: { date: string; amount: number }[]) => {
-                // Start with all ranges set to 0
                 const rangedData: { [key: string]: RangeData } = { ...ALL_RANGES.reduce((acc, r) => ({ ...acc, [r.range]: { ...r } }), {}) };
 
-                // Populate with actual data
                 apiData.forEach((item: { date: string; amount: number }) => {
                     const dueDate = new Date(item.date);
                     const today = new Date();
@@ -61,10 +56,8 @@ export function CashflowChart() {
                     }
                 });
 
-                // Convert to array and sort by order
                 const sortedData = Object.values(rangedData).sort((a, b) => a.order - b.order);
 
-                // Calculate total
                 const total = sortedData.reduce((sum, item) => sum + item.amount, 0);
 
                 setData(sortedData);
@@ -95,7 +88,6 @@ export function CashflowChart() {
         );
     }
 
-    // Find max value for determining which bars to highlight
     const maxAmount = Math.max(...data.map(d => d.amount));
 
     return (
@@ -109,7 +101,6 @@ export function CashflowChart() {
                 </p>
             </div>
 
-            {/* Bar Chart */}
             <div className="w-full h-120">
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={data} barCategoryGap="20%" margin={{ top: 10, right: 20, bottom: 10, left: 10 }}>
@@ -158,7 +149,6 @@ export function CashflowChart() {
                 </ResponsiveContainer>
             </div>
 
-            {/* Total Outflow Summary */}
             <div className="mt-4 text-center">
                 <p className="text-sm text-gray-600">Total Outflow</p>
                 <p className="text-2xl font-bold text-gray-900">

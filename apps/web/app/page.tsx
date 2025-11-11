@@ -47,7 +47,6 @@ export default function Home() {
             });
     }, []);
 
-    // Fallback trend data if -not- provided by API
     const defaultTrend = Array.from({ length: 10 }, (_, i) => ({
         value: Math.floor(Math.random() * 100) + 50,
     }));

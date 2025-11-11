@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import fetch from 'node-fetch'; // Make sure 'node-fetch' is in your package.json
+import fetch from 'node-fetch';
 import { PrismaClient } from '@prisma/client';
 import { TextDecoder } from 'util';
 
@@ -16,26 +16,25 @@ router.post('/chat-with-data', async (req: Request, res: Response, next: NextFun
             body: JSON.stringify({ question: query }),
         });
 
-        // --- NEW: Handle upstream errors (like cold starts) ---
+
         if (!response.ok) {
-            // Vanna service failed (e.g., 429, 504, 500)
-            // Try to get the error message it sent
+            
             const errorBody = await response.json().catch(() => ({}));
             const errorMessage = errorBody.error || `Upstream service failed with status: ${response.status}`;
 
             console.error(`Upstream Vanna service error: ${response.status} - ${errorMessage}`);
 
-            // Send the *exact* status code and error back to the frontend
+            
             return res.status(response.status).json({ error: errorMessage });
         }
-        // --- End of new error handling ---
+
 
         if (!response.body) {
-            // This is a different error: the request was OK, but the body is missing
+            
             throw new Error('Response body was null');
         }
 
-        // --- Stream the successful response back to the client ---
+
         res.setHeader('Content-Type', 'application/x-ndjson');
 
         const decoder = new TextDecoder();
@@ -52,18 +51,17 @@ router.post('/chat-with-data', async (req: Request, res: Response, next: NextFun
                 if (part) {
                     try {
                         const parsed = JSON.parse(part);
-                        // Save to history when we get the SQL
                         if (parsed.type === 'sql' && !sqlQuery) {
                             sqlQuery = parsed.data;
-                            // Run this in the background, don't await it
+                            
                             prisma.chatHistory.create({
                                 data: { question: query, sql: sqlQuery }
                             }).catch((dbError: any) => {
-                                // Log the error, but don't stop the stream
+                                
                                 console.error('Error saving to chat history:', dbError);
                             });
                         }
-                        // Write the chunk to the frontend
+                        
                         res.write(part + '\n');
                     } catch (e) {
                         console.error('Error parsing stream part:', part, e);
@@ -74,7 +72,7 @@ router.post('/chat-with-data', async (req: Request, res: Response, next: NextFun
         });
 
         response.body.on('end', () => {
-            // Handle any final part left in the buffer
+            
             if (buffer) {
                 try {
                     const parsed = JSON.parse(buffer);
@@ -91,20 +89,20 @@ router.post('/chat-with-data', async (req: Request, res: Response, next: NextFun
                     console.error('Error parsing final stream part:', buffer, e);
                 }
             }
-            // End the response stream to the frontend
+            
             res.end();
         });
 
         response.body.on('error', (err: any) => {
-            // This handles an error *during* the stream from Vanna
+            
             console.error('Error in response body stream:', err);
-            // We can't set status here as headers are already sent, but we can end the stream
+            
             res.end();
         });
 
     } catch (error) {
-        // This 'catch' block handles *network* errors
-        // e.g., the proxy couldn't connect to the Vanna service at all
+        
+        
         const message = (error instanceof Error) ? error.message : "Unknown error";
         console.error('Error proxying request to Vanna AI service:', message);
         return res.status(500).json({ error: 'Error proxying request to Vanna AI service' });

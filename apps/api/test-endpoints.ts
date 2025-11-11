@@ -73,60 +73,20 @@ async function testEndpoint(
 }
 
 async function runAllTests() {
-  console.log('═══════════════════════════════════════════════════════════');
   console.log('🚀 Backend API Endpoint Tests');
   console.log(`📍 Base URL: ${API_BASE_URL}`);
   console.log(`⏰ Started: ${new Date().toISOString()}`);
-  console.log('═══════════════════════════════════════════════════════════\n');
 
-  // Test 1: GET /stats
-  console.log('📊 Test 1: Dashboard Stats Endpoint');
-  console.log('───────────────────────────────────────────────────────────');
   await testEndpoint('GET', '/stats');
-
-  // Test 2: GET /invoice-trends
-  console.log('📈 Test 2: Invoice Trends Endpoint');
-  console.log('───────────────────────────────────────────────────────────');
   await testEndpoint('GET', '/invoice-trends');
-
-  // Test 3: GET /vendors/top10
-  console.log('🏢 Test 3: Top 10 Vendors Endpoint');
-  console.log('───────────────────────────────────────────────────────────');
   await testEndpoint('GET', '/vendors/top10');
-
-  // Test 4: GET /category-spend
-  console.log('🏷️  Test 4: Category Spend Endpoint');
-  console.log('───────────────────────────────────────────────────────────');
   await testEndpoint('GET', '/category-spend');
-
-  // Test 5: GET /cash-outflow
-  console.log('💸 Test 5: Cash Outflow Endpoint');
-  console.log('───────────────────────────────────────────────────────────');
   await testEndpoint('GET', '/cash-outflow');
-
-  // Test 6a: GET /invoices (without filters)
-  console.log('📄 Test 6a: Invoices Endpoint (No Filters)');
-  console.log('───────────────────────────────────────────────────────────');
   await testEndpoint('GET', '/invoices');
-
-  // Test 6b: GET /invoices (with search)
-  console.log('🔍 Test 6b: Invoices Endpoint (With Search)');
-  console.log('───────────────────────────────────────────────────────────');
   await testEndpoint('GET', '/invoices?search=invoice');
-
-  // Test 6c: GET /invoices (with sorting)
-  console.log('🔢 Test 6c: Invoices Endpoint (With Sorting)');
-  console.log('───────────────────────────────────────────────────────────');
   await testEndpoint('GET', '/invoices?sortBy=invoiceTotal&sortOrder=desc');
-
-  // Test 7: GET /history
-  console.log('📜 Test 7: Chat History Endpoint');
-  console.log('───────────────────────────────────────────────────────────');
   await testEndpoint('GET', '/history');
 
-  // Test 8: POST /chat-with-data (if Vanna is configured)
-  console.log('🤖 Test 8: Chat with Data Endpoint (Vanna AI Integration)');
-  console.log('───────────────────────────────────────────────────────────');
   if (process.env.VANNA_API_BASE_URL) {
     await testEndpoint('POST', '/chat-with-data', {
       query: 'What is the total number of invoices?'
@@ -135,24 +95,15 @@ async function runAllTests() {
     console.log('⚠️  Skipped: VANNA_API_BASE_URL not configured\n');
   }
 
-  // Test 9: POST /export/csv (with sample SQL)
-  console.log('📥 Test 9: Export to CSV Endpoint');
-  console.log('───────────────────────────────────────────────────────────');
   await testEndpoint('POST', '/export/csv', {
     sql: 'SELECT * FROM "Invoice" LIMIT 10'
   });
 
-  // Test 10: POST /export/excel (with sample SQL)
-  console.log('📊 Test 10: Export to Excel Endpoint');
-  console.log('───────────────────────────────────────────────────────────');
   await testEndpoint('POST', '/export/excel', {
     sql: 'SELECT * FROM "Invoice" LIMIT 10'
   });
 
-  // Print Summary
-  console.log('═══════════════════════════════════════════════════════════');
   console.log('📋 Test Summary');
-  console.log('═══════════════════════════════════════════════════════════');
 
   const passedTests = results.filter(r => r.status === 'PASS').length;
   const failedTests = results.filter(r => r.status === 'FAIL').length;
@@ -174,15 +125,11 @@ async function runAllTests() {
     });
   }
 
-  console.log('═══════════════════════════════════════════════════════════');
   console.log(`⏰ Completed: ${new Date().toISOString()}`);
-  console.log('═══════════════════════════════════════════════════════════\n');
 
-  // Exit with appropriate code
   process.exit(failedTests > 0 ? 1 : 0);
 }
 
-// Run tests
 runAllTests().catch(error => {
   console.error('❌ Unexpected error during testing:', error);
   process.exit(1);

@@ -20,7 +20,7 @@ export default function ChatPage() {
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
-  // --- NEW STATE for loading and cold starts ---
+
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("Generating response...");
 
@@ -48,7 +48,7 @@ export default function ChatPage() {
     setIsLoading(true);
     setLoadingMessage("Generating response..."); // Set default message
 
-    // Fallback timer just in case the request hangs indefinitely
+
     const coldStartTimer = setTimeout(() => {
       setLoadingMessage("Waking up the AI service... This can take a minute on the free tier. Please wait.");
     }, 8000); // 8 seconds
@@ -60,10 +60,10 @@ export default function ChatPage() {
         body: JSON.stringify({ query }),
       });
 
-      // We got a response, clear the fallback timer!
+
       clearTimeout(coldStartTimer);
 
-      // --- NEW: Handle specific cold start errors ---
+
       if (!res.ok) {
         const statusCode = res.status;
         const errorBody = await res.json().catch(() => ({})); // Get error from proxy
@@ -78,9 +78,9 @@ export default function ChatPage() {
         }
 
         setIsLoading(false);
-        return; // Stop execution
+        return; 
       }
-      // --- End of new error handling ---
+
 
       if (!res.body) {
         throw new Error("Response body is empty.");
@@ -118,16 +118,14 @@ export default function ChatPage() {
       }
 
       fetchHistory();
-
-    } catch (err: any) {
-      // This will catch *network* errors (e.g., failed to connect)
+    }
+    catch (err: any) {
       console.error(err);
       clearTimeout(coldStartTimer);
       setError("Failed to connect to the server. Please check your network and try again.");
     } finally {
-      // This block runs *always*
-      clearTimeout(coldStartTimer); // Ensure timer is always cleared
-      setIsLoading(false); // Stop loading
+      clearTimeout(coldStartTimer);
+      setIsLoading(false);
     }
   };
 
@@ -192,18 +190,18 @@ export default function ChatPage() {
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Ask a question about your data..."
                     className="flex-grow border border-zinc-300 rounded-md px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    disabled={isLoading} // Disable input while loading
+
                 />
                 <Button
                     type="submit"
                     className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                    disabled={isLoading} // Disable button while loading
+                    disabled={isLoading} 
                 >
-                  {isLoading ? "Thinking..." : "Ask"} {/* Change button text */}
+                  {isLoading ? "Thinking..." : "Ask"} 
                 </Button>
               </form>
 
-              {/* --- NEW: Loading UI --- */}
+
               {isLoading && (
                   <div className="mt-6 p-4 bg-gray-50 border border-zinc-200 rounded-md">
                     <h3 className="text-md font-semibold text-gray-700">Loading...</h3>
@@ -213,7 +211,7 @@ export default function ChatPage() {
                   </div>
               )}
 
-              {/* Show SQL *only* if not loading */}
+
               {!isLoading && sql && (
                   <div className="mt-6 p-4 bg-gray-50 border border-zinc-200 rounded-md">
                     <h3 className="text-md font-semibold text-gray-700">Generated SQL:</h3>
@@ -223,7 +221,7 @@ export default function ChatPage() {
                   </div>
               )}
 
-              {/* Show data *only* if not loading */}
+
               {!isLoading && data.length > 0 && (
                   <div className="mt-6">
                     <div className="flex justify-between items-center mb-2">
@@ -241,7 +239,7 @@ export default function ChatPage() {
                   </div>
               )}
 
-              {/* Show error *only* if not loading */}
+
               {!isLoading && error && (
                   <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-md">
                     <h3 className="text-md font-semibold text-red-700">Error:</h3>

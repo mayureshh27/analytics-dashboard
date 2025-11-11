@@ -1,11 +1,9 @@
-// /mycomponents/CategoryChart.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { Card } from "@repo/ui/card";
 
-// Color scheme matching the image
 const COLORS = ["#3b82f6", "#fb923c", "#fed7aa"];
 
 interface CategoryData {
@@ -59,7 +57,6 @@ export function CategoryChart() {
                 </p>
             </div>
 
-            {/* Pie Chart */}
             <div className="w-full h-64">
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -84,7 +81,6 @@ export function CategoryChart() {
                 </ResponsiveContainer>
             </div>
 
-            {/* Legend below chart */}
             <div className="mt-6 space-y-3">
                 {data.map((item, index) => (
                     <div key={item.category} className="flex items-center gap-3">

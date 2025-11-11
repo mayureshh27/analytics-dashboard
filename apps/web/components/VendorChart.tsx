@@ -114,31 +114,6 @@ export function VendorChart() {
           </ResponsiveContainer>
         </div>
 
-        {/*{globalSupplyVendor && (*/}
-        {/*    <div className="mt-6 p-4 bg-gray-50 rounded-lg">*/}
-        {/*      <p className="font-semibold text-gray-900 mb-3">Global Supply</p>*/}
-        {/*      <div className="flex items-center gap-6 text-sm">*/}
-        {/*        <div className="min-w-[120px]">*/}
-        {/*          <p className="text-gray-600 text-xs mb-1">Vendor Spend:</p>*/}
-        {/*          <p className="font-semibold text-blue-600 text-base">*/}
-        {/*            € {globalSupplyVendor.totalSpend.toLocaleString('de-DE', {*/}
-        {/*            minimumFractionDigits: 2,*/}
-        {/*            maximumFractionDigits: 2*/}
-        {/*          })}*/}
-        {/*          </p>*/}
-        {/*        </div>*/}
-        {/*        <div className="flex-1 h-2 bg-gray-300 rounded-full overflow-hidden">*/}
-        {/*          <div*/}
-        {/*              className="h-full bg-gradient-to-r from-gray-400 to-gray-300 rounded-full"*/}
-        {/*              style={{ width: `${(globalSupplyVendor.totalSpend / maxSpend) * 100}%` }}*/}
-        {/*          />*/}
-        {/*        </div>*/}
-        {/*        <p className="text-gray-500 text-xs whitespace-nowrap">*/}
-        {/*          €0k €15k €30k €45k*/}
-        {/*        </p>*/}
-        {/*      </div>*/}
-        {/*    </div>*/}
-        {/*)}*/}
       </Card>
   );
 }

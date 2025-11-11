@@ -1,11 +1,10 @@
-// File: apps/api/prisma/seed.ts
+
 import { PrismaClient } from '@prisma/client';
 import fs from 'fs';
 import path from 'path';
 
 const prisma = new PrismaClient();
 
-// Define a type for the expected JSON structure (simplified)
 type RawDoc = {
   _id: string;
   status: string;
@@ -57,7 +56,6 @@ type RawDoc = {
               quantity?: { value: number };
               unitPrice?: { value: number };
               totalPrice?: { value: number };
-              // --- FIXED: Types updated to accept string or number ---
               Sachkonto?: { value: string | number };
               BUSchluessel?: { value: string | number };
             }>;
@@ -71,7 +69,6 @@ type RawDoc = {
 async function main() {
   console.log('Start seeding...');
 
-  // 1. Clear existing data in the correct order
   console.log('Clearing old data...');
   await prisma.lineItem.deleteMany();
   await prisma.payment.deleteMany();
@@ -80,11 +77,10 @@ async function main() {
   await prisma.customer.deleteMany();
   await prisma.category.deleteMany();
 
-  // 2. Read the JSON file
   const jsonPath = path.join(
       process.cwd(),
-      '..', // up from /api
-      '..', // up from /apps
+      '..', 
+      '..', 
       'data',
       'Analytics_Test_Data.json',
   );
@@ -102,11 +98,9 @@ async function main() {
   let createdCount = 0;
   let skippedCount = 0;
 
-  // 3. Loop and create records
   for (const doc of rawData) {
     const llm = doc.extractedData?.llmData;
 
-    // Validation check (now pointing to the correct summary path)
     if (
         !llm ||
         !llm.invoice?.value?.invoiceId?.value ||
@@ -125,14 +119,12 @@ async function main() {
       const customerName =
           llm.customer?.value?.customerName?.value || 'Unknown Customer';
 
-      // --- Create Line Items (in memory) ---
       const lineItemsToCreate = [];
 
       const itemsArray = llm.lineItems?.value?.items?.value;
 
       if (itemsArray && Array.isArray(itemsArray)) {
         for (const item of itemsArray) {
-          // --- FIXED: Explicitly cast Sachkonto to string ---
           const categoryCode = String(item.Sachkonto?.value || 'UNKNOWN');
 
           lineItemsToCreate.push({
@@ -140,7 +132,6 @@ async function main() {
             quantity: item.quantity?.value,
             unitPrice: item.unitPrice?.value,
             totalPrice: item.totalPrice?.value,
-            // --- FIXED: Explicitly cast BUSchluessel to string or null ---
             buKey: item.BUSchluessel?.value
                 ? String(item.BUSchluessel.value)
                 : null,
@@ -154,7 +145,7 @@ async function main() {
         }
       }
 
-      // --- Create the Invoice and connect everything ---
+
       await prisma.invoice.create({
         data: {
           documentId: doc._id,
@@ -222,7 +213,7 @@ async function main() {
     }
   }
 
-  console.log('--- Seeding Finished ---');
+  console.log('Seeding Finished');
   console.log(`✅ Successfully created ${createdCount} invoices.`);
   console.log(`⚠️ Skipped ${skippedCount} documents due to missing data.`);
 }

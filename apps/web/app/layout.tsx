@@ -34,7 +34,6 @@ export default function RootLayout({
         <SidebarProvider defaultOpen={true}>
             <AppSidebar />
             <SidebarInset className="flex flex-col">
-                {/* Header matching your dashboard design */}
                 <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4">
                     <div className="flex items-center gap-2">
                         <SidebarTrigger className="-ml-1" />
@@ -48,7 +47,6 @@ export default function RootLayout({
                         </Breadcrumb>
                     </div>
 
-                    {/* Right side header items */}
                     <div className="ml-auto flex items-center gap-4">
                         <button className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors">
                             <Bell className="h-5 w-5" />
@@ -58,14 +56,13 @@ export default function RootLayout({
                                 <span className="text-sm font-semibold">AJ</span>
                             </div>
                             <div className="hidden md:block text-left">
-                                <div className="text-sm font-medium">Amit Jadhav</div>
+                                <div className="text-sm font-medium">Mayuresh</div>
                                 <div className="text-xs text-gray-500">Admin</div>
                             </div>
                         </button>
                     </div>
                 </header>
 
-                {/* Main content */}
                 <main className="flex-1 overflow-auto p-4 md:p-8 bg-gray-50">
                     {children}
                 </main>
