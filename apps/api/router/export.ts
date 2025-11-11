@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { PrismaClient } from '../prisma-client';
+import { PrismaClient } from '@prisma/client';
 import { Parser } from 'json2csv';
 import * as xlsx from 'xlsx';
 

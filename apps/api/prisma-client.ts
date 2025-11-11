@@ -1,3 +1,3 @@
-// Re-export from the correct location
-export * from './node_modules/.prisma/client';
-export { PrismaClient } from './node_modules/.prisma/client';
+// // apps/api/prisma-client.ts
+// export * from '@prisma/client';
+// export { PrismaClient } from '@prisma/client';

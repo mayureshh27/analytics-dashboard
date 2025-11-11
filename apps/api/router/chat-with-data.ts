@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import fetch from 'node-fetch';
-import { PrismaClient } from '../prisma-client';
+import { PrismaClient } from '@prisma/client';
 import { TextDecoder } from 'util';
 
 const prisma = new PrismaClient();
