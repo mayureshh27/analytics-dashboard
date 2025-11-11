@@ -1,6 +1,6 @@
-# Flowchat Gemini
+# Analytics Dashboard
 
-This project is a full-stack application that allows users to chat with their data. It uses a React frontend, a Node.js/Express backend, and a PostgreSQL database.
+This project is a full-stack application that allows users to chat with their data. It uses a Nextjs frontend, a Node.js/Express and FastAPI backend, and a PostgreSQL database.
 
 ## Setup
 
@@ -9,18 +9,21 @@ This project is a full-stack application that allows users to chat with their da
 - Node.js (v18 or higher)
 - pnpm
 - Docker
+- python
 
 ### 1. Clone the repository
 
 ```bash
 git clone <repository-url>
-cd flowchat-gemini
 ```
 
 ### 2. Install dependencies
 
 ```bash
 pnpm install
+
+cd services/vanna
+pip install -r requirements.txt
 ```
 
 ### 3. Set up environment variables
@@ -30,6 +33,8 @@ Create a `.env` file in the `apps/api` directory and add the following environme
 ```
 DATABASE_URL="postgresql://user:password@localhost:5432/flowchat?schema=public"
 VANNA_API_BASE_URL="http://localhost:8084"
+PORT:
+CORS-ORIGIN
 ```
 
 ### 4. Start the database
