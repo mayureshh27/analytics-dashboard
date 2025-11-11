@@ -12,7 +12,7 @@
     "resolveJsonModule": true,
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
-    "types": ["node"],
+    "types": ["node", "express"],
     "baseUrl": ".",
     "paths": {
       "@prisma/client": ["./node_modules/.prisma/client"]
